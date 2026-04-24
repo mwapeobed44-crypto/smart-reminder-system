@@ -1,0 +1,123 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  margin: 0;
+  color: white;
+}
+
+.container {
+  max-width: 600px;
+  margin: 30px auto;
+}
+
+/* 🌟 GOLD TITLE */
+.main-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: bold;
+  background: linear-gradient(45deg, gold, orange, #ffd700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: glow 2s infinite alternate;
+}
+
+.sub-title {
+  display: block;
+  font-size: 20px;
+}
+
+/* ✨ GLOW */
+@keyframes glow {
+  from { text-shadow: 0 0 5px gold; }
+  to { text-shadow: 0 0 20px orange; }
+}
+
+.card {
+  background: rgba(255,255,255,0.1);
+  padding: 20px;
+  margin-top: 20px;
+  border-radius: 15px;
+}
+
+.input-group {
+  display: flex;
+  background: rgba(255,255,255,0.2);
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+input, select {
+  background: transparent;
+  border: none;
+  color: white;
+  width: 100%;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background: gold;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+li {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0;
+}
+
+.delete-btn {
+  width: auto;              /* 🔥 stop full width */
+  padding: 4px 8px;        /* smaller size */
+  font-size: 12px;         /* smaller text */
+  border-radius: 6px;
+  background: red;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.delete-btn {
+  width: auto;              /* 🔥 stop full width */
+  padding: 4px 8px;        /* smaller size */
+  font-size: 12px;         /* smaller text */
+  border-radius: 6px;
+  background: red;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.delete-btn {
+  width: auto;              /* 🔥 stop full width */
+  padding: 4px 8px;        /* smaller size */
+  font-size: 12px;         /* smaller text */
+  border-radius: 6px;
+  background: red;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.delete-btn {
+  width: auto;              /* 🔥 stop full width */
+  padding: 4px 8px;        /* smaller size */
+  font-size: 12px;         /* smaller text */
+  border-radius: 6px;
+  background: red;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.delete-btn:hover {
+  background: darkred;
+  transform: scale(1.05);
+}

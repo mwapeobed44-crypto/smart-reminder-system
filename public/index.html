@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reminder System</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- 🌟 GOLD TITLE -->
+  <h1 class="main-title">
+    BLW SA ZONE H EVENTS REMINDER SYSTEM <br>
+    <span class="sub-title">KAPASA MAKASA UNIVERSITY</span>
+  </h1>
+
+  <!-- FORM -->
+  <div class="card">
+    <h2><i class="fa-solid fa-bell"></i> Add Reminder</h2>
+
+    <form id="reminderForm">
+
+      <!-- TITLE -->
+      <label>Title</label>
+      <div class="input-group">
+        <i class="fa-solid fa-pen"></i>
+        <input type="text" id="title" required>
+      </div>
+
+      <!-- TYPE -->
+      <label>Type</label>
+      <div class="input-group">
+        <i class="fa-solid fa-list"></i>
+        <select id="type">
+          <option value="event">Event</option>
+          <option value="birthday">Birthday</option>
+        </select>
+      </div>
+
+      <!-- PHONE -->
+      <label>Phone</label>
+      <div class="input-group">
+        <i class="fa-solid fa-phone"></i>
+        <input type="tel" id="phone" placeholder="2609XXXXXXXX" required>
+      </div>
+
+      <!-- 🔥 UPDATED DATE + TIME -->
+      <label>Date & Time</label>
+      <div class="input-group">
+        <i class="fa-solid fa-calendar"></i>
+        <input type="datetime-local" id="date" required>
+      </div>
+
+      <!-- BUTTON -->
+      <button type="submit">
+        <i class="fa-solid fa-plus"></i> Add Reminder
+      </button>
+
+    </form>
+  </div>
+
+  <!-- LIST -->
+  <div class="card">
+    <h2><i class="fa-solid fa-list"></i> Reminders</h2>
+    <ul id="reminderList"></ul>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
