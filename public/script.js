@@ -1,6 +1,9 @@
 const form = document.getElementById("reminderForm");
 const list = document.getElementById("reminderList");
 
+// 🌍 LIVE API URL
+const API_URL = "https://smart-reminder-system-a0w0.onrender.com/api/reminders";
+
 console.log("FRONTEND SCRIPT RUNNING ✅");
 
 window.onload = loadReminders;
@@ -26,7 +29,7 @@ function showPopup(message, color = "green") {
 }
 
 /* =========================
-   ➕ ADD REMINDER (FIXED)
+   ➕ ADD REMINDER
 ========================= */
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -36,10 +39,7 @@ form.addEventListener("submit", async (e) => {
   const reminder = {
     title: document.getElementById("title").value.trim(),
     type: document.getElementById("type").value,
-
-    // 🔥 FIXED DATE FORMAT
     date: new Date(document.getElementById("date").value).toISOString(),
-
     phones: phoneInput
       .split(",")
       .map(p => p.trim())
@@ -49,14 +49,13 @@ form.addEventListener("submit", async (e) => {
   console.log("SENDING:", reminder);
 
   try {
-    const res = await fetch("http://localhost:3000/api/reminders", {
+    const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(reminder)
     });
 
     const data = await res.json();
-
     console.log("RESPONSE:", data);
 
     if (!res.ok) throw new Error(data.message);
@@ -72,11 +71,11 @@ form.addEventListener("submit", async (e) => {
 });
 
 /* =========================
-   📥 LOAD REMINDERS (FIXED)
+   📥 LOAD REMINDERS
 ========================= */
 async function loadReminders() {
   try {
-    const res = await fetch("http://localhost:3000/api/reminders");
+    const res = await fetch(API_URL);
     const data = await res.json();
 
     list.innerHTML = "";
@@ -112,7 +111,7 @@ async function loadReminders() {
 ========================= */
 async function deleteReminder(id) {
   try {
-    await fetch(`http://localhost:3000/api/reminders/${id}`, {
+    await fetch(`${API_URL}/${id}`, {
       method: "DELETE"
     });
 
@@ -120,7 +119,7 @@ async function deleteReminder(id) {
     loadReminders();
 
   } catch (err) {
-    console.error(er
+    console.error(err);
     showPopup("❌ Delete failed", "red");
   }
 }
