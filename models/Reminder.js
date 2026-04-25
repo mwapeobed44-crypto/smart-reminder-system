@@ -18,23 +18,26 @@ const reminderSchema = new mongoose.Schema({
     required: true
   },
 
-  // ✅ phones array (correct)
+  // ✅ phones array
   phones: {
     type: [String],
     required: true
   },
 
-  // 🔥 NEW: for yearly repeating (birthdays)
+  // 🔐 NEW: link reminder to a user
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  },
+
+  // 🔥 recurring (for birthdays)
   isRecurring: {
     type: Boolean,
     default: false
   },
 
-  // used by cron to avoid duplicate sending
+  // avoid duplicate sending
   sentDayBefore: {
     type: Boolean,
     default: false
-  }
-});
-
-module.exports = mongoose.model("Reminder", reminderSchema);

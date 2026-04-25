@@ -1,12 +1,38 @@
 const form = document.getElementById("reminderForm");
 const list = document.getElementById("reminderList");
 
-// 🌍 LIVE API URL
-const API_URL = "https://smart-reminder-system-a0w0.onrender.com/api/reminders";
+// 🌍 BASE URL
+const BASE_URL = "https://smart-reminder-system-a0w0.onrender.com";
+const API_URL = `${BASE_URL}/api/reminders`;
 
 console.log("FRONTEND SCRIPT RUNNING ✅");
 
-window.onload = loadReminders;
+// 🔐 TOKEN
+let token = localStorage.getItem("token");
+
+/* =========================
+   UI CONTROL
+========================= */
+function checkAuthUI() {
+  const appSection = document.getElementById("appSection");
+
+  if (token) {
+    appSection.style.display = "block";
+  } else {
+    appSection.style.display = "none";
+  }
+}
+
+/* =========================
+   LOAD ON START
+========================= */
+window.onload = () => {
+  checkAuthUI();
+
+  if (token) {
+    loadReminders();
+  }
+};
 
 /* =========================
    POPUP
@@ -29,10 +55,84 @@ function showPopup(message, color = "green") {
 }
 
 /* =========================
+   🔐 REGISTER
+========================= */
+async function register() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  try {
+    const res = await fetch(`${BASE_URL}/api/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.message);
+
+    showPopup("✅ Registered! Now login.");
+
+  } catch (err) {
+    console.error(err);
+    showPopup("❌ Registration failed", "red");
+  }
+}
+
+/* =========================
+   🔐 LOGIN
+========================= */
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  try {
+    const res = await fetch(`${BASE_URL}/api/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.message);
+
+    localStorage.setItem("token", data.token);
+    token = data.token;
+
+    showPopup("✅ Logged in!");
+    checkAuthUI();
+    loadReminders();
+
+  } catch (err) {
+    console.error(err);
+    showPopup("❌ Login failed", "red");
+  }
+}
+
+/* =========================
+   🔓 LOGOUT
+========================= */
+function logout() {
+  localStorage.removeItem("token");
+  token = null;
+
+  list.innerHTML = "";
+  checkAuthUI();
+
+  showPopup("👋 Logged out", "orange");
+}
+
+/* =========================
    ➕ ADD REMINDER
 ========================= */
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
+
+  if (!token) {
+    return showPopup("⚠️ Please login first", "orange");
+  }
 
   const phoneInput = document.getElementById("phone").value;
 
@@ -46,17 +146,17 @@ form.addEventListener("submit", async (e) => {
       .filter(p => p !== "")
   };
 
-  console.log("SENDING:", reminder);
-
   try {
     const res = await fetch(API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": token
+      },
       body: JSON.stringify(reminder)
     });
 
     const data = await res.json();
-    console.log("RESPONSE:", data);
 
     if (!res.ok) throw new Error(data.message);
 
@@ -75,7 +175,12 @@ form.addEventListener("submit", async (e) => {
 ========================= */
 async function loadReminders() {
   try {
-    const res = await fetch(API_URL);
+    const res = await fetch(API_URL, {
+      headers: {
+        "Authorization": token
+      }
+    });
+
     const data = await res.json();
 
     list.innerHTML = "";
@@ -102,7 +207,7 @@ async function loadReminders() {
 
   } catch (err) {
     console.error(err);
-    showPopup("❌ Load failed", "red");
+    showPopup("❌ Load failed (login first)", "red");
   }
 }
 
@@ -112,7 +217,10 @@ async function loadReminders() {
 async function deleteReminder(id) {
   try {
     await fetch(`${API_URL}/${id}`, {
-      method: "DELETE"
+      method: "DELETE",
+      headers: {
+        "Authorization": token
+      }
     });
 
     showPopup("🗑️ Deleted", "orange");
