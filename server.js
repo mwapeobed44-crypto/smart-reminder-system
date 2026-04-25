@@ -5,7 +5,7 @@ const cron = require("node-cron");
 require("dotenv").config();
 
 const twilio = require("twilio");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const User = require("./models/User");
