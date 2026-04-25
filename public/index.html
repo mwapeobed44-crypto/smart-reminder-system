@@ -19,7 +19,7 @@
     <span class="sub-title">KAPASA MAKASA UNIVERSITY</span>
   </h1>
 
-  <!-- 🔐 AUTH SECTION (ALWAYS VISIBLE) -->
+  <!-- 🔐 AUTH SECTION -->
   <div class="card">
     <h2><i class="fa-solid fa-user"></i> Account</h2>
 
@@ -34,21 +34,13 @@
     </div>
 
     <div style="display:flex; gap:10px; margin-top:10px;">
-      <button onclick="register()">
-        <i class="fa-solid fa-user-plus"></i> Register
-      </button>
-
-      <button onclick="login()">
-        <i class="fa-solid fa-right-to-bracket"></i> Login
-      </button>
-
-      <button onclick="logout()" style="background:red;">
-        <i class="fa-solid fa-right-from-bracket"></i> Logout
-      </button>
+      <button type="button" onclick="register()">Register</button>
+      <button type="button" onclick="login()">Login</button>
+      <button type="button" onclick="logout()" style="background:red;">Logout</button>
     </div>
   </div>
 
-  <!-- 📌 APP SECTION (HIDDEN UNTIL LOGIN) -->
+  <!-- 📌 APP SECTION (ALWAYS IN DOM) -->
   <div id="appSection" style="display:none;">
 
     <!-- FORM -->
@@ -57,38 +49,29 @@
 
       <form id="reminderForm">
 
-        <!-- TITLE -->
         <label>Title</label>
         <div class="input-group">
-          <i class="fa-solid fa-pen"></i>
           <input type="text" id="title" required>
         </div>
 
-        <!-- TYPE -->
         <label>Type</label>
         <div class="input-group">
-          <i class="fa-solid fa-list"></i>
           <select id="type">
             <option value="event">Event</option>
             <option value="birthday">Birthday</option>
           </select>
         </div>
 
-        <!-- PHONE -->
         <label>Phone</label>
         <div class="input-group">
-          <i class="fa-solid fa-phone"></i>
           <input type="tel" id="phone" placeholder="2609XXXXXXXX" required>
         </div>
 
-        <!-- DATE -->
         <label>Date & Time</label>
         <div class="input-group">
-          <i class="fa-solid fa-calendar"></i>
           <input type="datetime-local" id="date" required>
         </div>
 
-        <!-- BUTTON -->
         <button type="submit">
           <i class="fa-solid fa-plus"></i> Add Reminder
         </button>
