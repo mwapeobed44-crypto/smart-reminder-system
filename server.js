@@ -5,19 +5,19 @@ const cron = require("node-cron");
 require("dotenv").config();
 
 const twilio = require("twilio");
-
-// 🔐 NEW
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
 const User = require("./models/User");
+const Reminder = require("./models/Reminder");
 
 const app = express();
 
 /* =========================
-   START CHECK
+   START LOG
 ========================= */
 console.log("🔥 SERVER STARTING...");
-console.log("MONGO_URI =", process.env.MONGO_URI);
+console.log("PORT:", process.env.PORT);
 
 /* =========================
    MIDDLEWARE
@@ -27,7 +27,7 @@ app.use(express.json());
 app.use(express.static("public"));
 
 /* =========================
-   TWILIO SETUP
+   TWILIO
 ========================= */
 const client = twilio(
   process.env.TWILIO_SID,
@@ -35,71 +35,74 @@ const client = twilio(
 );
 
 /* =========================
-   DATABASE
+   DB CONNECTION
 ========================= */
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB Atlas Connected"))
+  .then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.log("❌ DB Error:", err.message));
 
-const Reminder = require("./models/Reminder");
-
 /* =========================
-   🔐 AUTH MIDDLEWARE
+   AUTH MIDDLEWARE (FIXED)
 ========================= */
 function auth(req, res, next) {
-  const token = req.headers.authorization;
+  const header = req.headers.authorization;
 
-  if (!token) return res.status(401).json({ message: "No token" });
+  if (!header) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+
+  const token = header.startsWith("Bearer ")
+    ? header.split(" ")[1]
+    : header;
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "secretkey");
     req.userId = decoded.userId;
     next();
-  } catch {
-    res.status(401).json({ message: "Invalid token" });
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid token" });
   }
 }
 
 /* =========================
-   🔐 AUTH ROUTES
+   REGISTER
 ========================= */
-
-// REGISTER
 app.post("/api/register", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const exists = await User.findOne({ email });
+    if (exists) {
+      return res.status(400).json({ message: "User already exists" });
+    }
 
-    const user = new User({
-      email,
-      password: hashedPassword
-    });
+    const hashed = await bcrypt.hash(password, 10);
 
+    const user = new User({ email, password: hashed });
     await user.save();
 
-    res.json({ message: "User registered" });
+    res.json({ message: "User registered successfully" });
 
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// LOGIN
+/* =========================
+   LOGIN
+========================= */
 app.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(400).json({ message: "Invalid password" });
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      return res.status(400).json({ message: "Wrong password" });
     }
 
     const token = jwt.sign(
@@ -126,7 +129,7 @@ async function sendSMS(phone, message) {
       to: phone
     });
 
-    console.log("📩 SMS SENT:", phone);
+    console.log("📩 SENT:", phone);
 
   } catch (err) {
     console.log("❌ SMS ERROR:", err.message);
@@ -134,20 +137,7 @@ async function sendSMS(phone, message) {
 }
 
 /* =========================
-   TEST SMS ROUTE
-========================= */
-app.get("/test-sms", async (req, res) => {
-  try {
-    const testNumber = "+260769976652";
-    await sendSMS(testNumber, "🔥 TEST SMS WORKING");
-    res.send("✅ TEST SMS SENT SUCCESSFULLY");
-  } catch (err) {
-    res.status(500).send("❌ TEST FAILED");
-  }
-});
-
-/* =========================
-   CREATE REMINDER (🔐 PROTECTED)
+   REMINDERS (PROTECTED)
 ========================= */
 app.post("/api/reminders", auth, async (req, res) => {
   try {
@@ -165,21 +155,13 @@ app.post("/api/reminders", auth, async (req, res) => {
       phones = [phones];
     }
 
-    phones = phones.map(p => String(p).trim()).filter(Boolean);
-
-    const parsedDate = new Date(date);
-
-    if (isNaN(parsedDate.getTime())) {
-      return res.status(400).json({ message: "Invalid date" });
-    }
-
     const reminder = new Reminder({
       title,
       type,
-      date: parsedDate,
+      date: new Date(date),
       phones,
       isRecurring: type === "birthday",
-      userId: req.userId   // 🔥 LINK TO USER
+      userId: req.userId
     });
 
     const saved = await reminder.save();
@@ -192,11 +174,11 @@ app.post("/api/reminders", auth, async (req, res) => {
 });
 
 /* =========================
-   GET REMINDERS (🔐 USER ONLY)
+   GET REMINDERS
 ========================= */
 app.get("/api/reminders", auth, async (req, res) => {
   try {
-    const data = await Reminder.find({ userId: req.userId }).sort({ date: 1 });
+    const data = await Reminder.find({ userId: req.userId });
     res.json(data);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -220,15 +202,12 @@ app.delete("/api/reminders/:id", auth, async (req, res) => {
 ========================= */
 cron.schedule("* * * * *", async () => {
   try {
-    console.log("⏰ CRON RUNNING...");
-
     const reminders = await Reminder.find();
 
     for (let r of reminders) {
       if (!r.sentDayBefore) {
-
         for (let phone of r.phones) {
-          await sendSMS(phone, `📅 TEST REMINDER: ${r.title}`);
+          await sendSMS(phone, `📅 REMINDER: ${r.title}`);
         }
 
         r.sentDayBefore = true;
@@ -242,8 +221,10 @@ cron.schedule("* * * * *", async () => {
 });
 
 /* =========================
-   START SERVER
+   START SERVER (RENDER SAFE)
 ========================= */
-app.listen(process.env.PORT || 3000, () => {
-  console.log("🚀 Server running...");
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log("🚀 Server running on port", PORT);
 });
